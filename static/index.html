@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MQTT Log Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div>
+          <h1>MQTT Log Viewer</h1>
+          <p>試験ログをトピック・時間・内容で切り分け、必要な区間だけ書き出す。</p>
+        </div>
+        <div id="statusBadge" class="badge"><span class="dot"></span><span id="statusText">file mode</span></div>
+      </header>
+
+      <div class="layout">
+        <aside class="panel stack">
+          <section class="stack">
+            <h2>Source</h2>
+            <div class="row">
+              <button id="btnUpload" class="primary" type="button">ログを開く</button>
+              <input id="fileInput" type="file" accept=".jsonl,.ndjson,.json,.csv,.tsv,.log,.txt" hidden />
+              <button id="btnSample" type="button">サンプル読込</button>
+            </div>
+            <label>
+              サンプル
+              <select id="sampleSelect">
+                <option value="sample_periodic.log">周期通信（抜け・遅延あり）</option>
+                <option value="sample.jsonl">基本</option>
+              </select>
+            </label>
+            <p class="hint">JSONL / JSON配列 / CSV・TSV / テキスト（<code>mosquitto_sub -v</code> 形式）。表へのドラッグ&amp;ドロップも可。</p>
+            <details id="mappingBox">
+              <summary>ログ形式（フィールド名）</summary>
+              <div class="stack mapping">
+                <p class="hint">空欄なら自動判定。ネストは <code>meta.time</code> のようにドット区切り。payload欄が無いログは、残りの項目全体をpayloadとして扱います。</p>
+                <label>時刻 <input id="mapTs" type="text" placeholder="ts / timestamp" /></label>
+                <label>トピック <input id="mapTopic" type="text" placeholder="topic" /></label>
+                <label>QoS <input id="mapQos" type="text" placeholder="qos" /></label>
+                <label>Payload <input id="mapPayload" type="text" placeholder="payload" /></label>
+                <button id="btnReparse" type="button">この設定で再読込</button>
+              </div>
+            </details>
+          </section>
+
+          <section class="stack">
+            <h2>Filter</h2>
+            <label>
+              Topic
+              <input id="topicFilter" type="text" placeholder="fleet/vehicle/+/telemetry" />
+            </label>
+            <label>
+              Payload に含む文字
+              <input id="payloadFilter" type="text" placeholder="near_miss" />
+            </label>
+            <label>
+              QoS
+              <select id="qosFilter">
+                <option value="">any</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </label>
+            <label>
+              開始時刻
+              <input id="timeFrom" type="text" placeholder="2026-11-15 10:00:00.000" />
+            </label>
+            <label>
+              終了時刻
+              <input id="timeTo" type="text" placeholder="2026-11-15 10:00:05.000" />
+            </label>
+            <div class="row">
+              <button id="btnApply" class="primary" type="button">適用</button>
+              <button id="btnClearFilter" type="button">クリア</button>
+            </div>
+            <p class="hint"><code>+</code> は1階層、<code>#</code> は末尾の複数階層。時刻は <code>2026-11-15 10:00:00.123</code> 形式（JST）、ISO 8601、UNIX時間。</p>
+          </section>
+
+          <section class="stack">
+            <h2>周期抜け検出</h2>
+            <label>
+              判定方法
+              <select id="gapMode">
+                <option value="auto">自動（通常間隔 × 倍率）</option>
+                <option value="fixed">固定しきい値（ms）</option>
+                <option value="off">判定しない</option>
+              </select>
+            </label>
+            <label id="gapFactorField">
+              倍率
+              <input id="gapFactor" type="number" value="1.5" min="1.1" step="0.1" />
+            </label>
+            <label id="gapMsField" hidden>
+              しきい値 (ms)
+              <input id="gapMs" type="number" value="1000" min="1" step="10" />
+            </label>
+            <label>
+              対象トピック
+              <input id="gapTopic" type="text" placeholder="空欄なら全トピック（例: fleet/vehicle/+/telemetry）" />
+            </label>
+            <label class="check"><input id="gapsOnly" type="checkbox" /> 周期抜けの行だけ表示</label>
+            <p class="hint">通常間隔は、そのトピックの受信間隔（Δt）の中央値です。5回以上受信したトピックが対象。event・alert など不定期のトピックは、対象トピックで除外してください。</p>
+          </section>
+
+          <section class="stack">
+            <h2>Topics</h2>
+            <div id="topicStats" class="stats"></div>
+          </section>
+
+          <details class="stack">
+            <summary><h2 class="inline">Live MQTT</h2></summary>
+            <div class="stack mapping">
+              <label>Host <input id="mqttHost" type="text" value="localhost" /></label>
+              <label>Port <input id="mqttPort" type="number" value="1883" /></label>
+              <label>Topic <input id="mqttTopic" type="text" value="#" /></label>
+              <label>Username <input id="mqttUser" type="text" autocomplete="off" /></label>
+              <label>Password <input id="mqttPass" type="password" autocomplete="off" /></label>
+              <div class="row">
+                <button id="btnConnect" class="primary" type="button">接続</button>
+                <button id="btnDisconnect" type="button">切断</button>
+                <button id="btnLiveClear" type="button">消去</button>
+              </div>
+              <p id="liveError" class="error"></p>
+              <p class="hint">ローカルBroker向けデモ。社外秘ブローカーには繋げないでください。</p>
+            </div>
+          </details>
+        </aside>
+
+        <main class="panel main-panel">
+          <div class="toolbar">
+            <div>
+              <strong id="countLabel">0 件</strong>
+              <span class="hint" id="sourceLabel"></span>
+              <button id="gapBadge" class="gap-badge" type="button" hidden title="クリックで周期抜けの行だけ表示 / 解除"></button>
+            </div>
+            <div class="row">
+              <button id="btnRefresh" type="button">更新</button>
+              <button id="btnExportGraph" type="button" title="Payloadの項目ごとに列を分けたCSV。Excelでそのままグラフにできます">グラフ用CSV</button>
+              <button id="btnExportCsv" type="button">CSV出力</button>
+              <button id="btnExportJsonl" type="button">JSONL出力</button>
+            </div>
+          </div>
+
+          <div id="dropZone" class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th class="num">Δt (ms)</th>
+                  <th>Topic</th>
+                  <th class="num">QoS</th>
+                  <th>Payload</th>
+                </tr>
+              </thead>
+              <tbody id="messageBody"></tbody>
+            </table>
+            <div class="drop-overlay">ここにログをドロップ</div>
+          </div>
+
+          <section class="stack">
+            <div class="toolbar">
+              <h2>選択中のメッセージ</h2>
+              <div class="row">
+                <label class="inline-label">前後
+                  <input id="windowSec" type="number" value="5" min="0" step="0.5" />秒</label>
+                <button id="btnWindow" type="button" disabled>前後で絞り込み</button>
+                <button id="btnCopy" type="button" disabled>Payloadコピー</button>
+              </div>
+            </div>
+            <div class="detail"><pre id="detailView">メッセージを選択してください</pre></div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

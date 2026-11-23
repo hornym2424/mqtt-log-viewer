@@ -1,0 +1,15 @@
+{"ts":"2026-11-15 10:00:00.120","topic":"fleet/vehicle/001/telemetry","qos":0,"payload":{"speed_kmh":32.4,"lat":35.6812,"lon":139.7671,"heading":90}}
+{"ts":"2026-11-15 10:00:00.340","topic":"fleet/vehicle/001/status","qos":1,"payload":{"state":"moving","battery_pct":78}}
+{"ts":"2026-11-15 10:00:01.015","topic":"infra/rsu/12/signal","qos":1,"payload":{"phase":"green","ttl_ms":4200}}
+{"ts":"2026-11-15 10:00:01.210","topic":"fleet/vehicle/002/telemetry","qos":0,"payload":{"speed_kmh":0.0,"lat":35.6820,"lon":139.7660,"heading":180}}
+{"ts":"2026-11-15 10:00:01.480","topic":"fleet/vehicle/001/telemetry","qos":0,"payload":{"speed_kmh":33.1,"lat":35.6813,"lon":139.7674,"heading":91}}
+{"ts":"2026-11-15 10:00:02.002","topic":"infra/rsu/12/signal","qos":1,"payload":{"phase":"yellow","ttl_ms":1800}}
+{"ts":"2026-11-15 10:00:02.300","topic":"fleet/vehicle/001/event","qos":1,"payload":{"type":"near_miss","severity":"pedestrian","confidence":0.71}}
+{"ts":"2026-11-15 10:00:02.550","topic":"fleet/vehicle/002/status","qos":1,"payload":{"state":"idle","battery_pct":91}}
+{"ts":"2026-11-15 10:00:03.100","topic":"infra/rsu/12/broadcast","qos":0,"payload":"RSU_HEARTBEAT"}
+{"ts":"2026-11-15 10:00:03.400","topic":"fleet/vehicle/001/telemetry","qos":0,"payload":{"speed_kmh":28.7,"lat":35.6815,"lon":139.7678,"heading":95}}
+{"ts":"2026-11-15 10:00:04.010","topic":"fleet/vehicle/003/telemetry","qos":0,"payload":{"speed_kmh":41.2,"lat":35.6801,"lon":139.7690,"heading":12}}
+{"ts":"2026-11-15 10:00:04.220","topic":"infra/rsu/12/signal","qos":1,"payload":{"phase":"red","ttl_ms":30000}}
+{"ts":"2026-11-15 10:00:04.800","topic":"fleet/vehicle/001/status","qos":1,"payload":{"state":"yielding","battery_pct":77}}
+{"ts":"2026-11-15 10:00:05.050","topic":"ops/alert","qos":1,"payload":{"level":"warn","code":"LATENCY_SPIKE","detail":"broker rtt > 120ms"}}
+{"ts":"2026-11-15 10:00:05.400","topic":"fleet/vehicle/003/event","qos":1,"payload":{"type":"route_update","route_id":"A-17"}}

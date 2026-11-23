@@ -1,0 +1,15 @@
+2026-11-15 10:00:00.120 fleet/vehicle/001/telemetry {"speed_kmh":32.4,"lat":35.6812,"lon":139.7671,"heading":90}
+2026-11-15 10:00:00.340 fleet/vehicle/001/status {"state":"moving","battery_pct":78}
+2026-11-15 10:00:01.015 infra/rsu/12/signal {"phase":"green","ttl_ms":4200}
+2026-11-15 10:00:01.210 fleet/vehicle/002/telemetry {"speed_kmh":0.0,"lat":35.682,"lon":139.766,"heading":180}
+2026-11-15 10:00:01.480 fleet/vehicle/001/telemetry {"speed_kmh":33.1,"lat":35.6813,"lon":139.7674,"heading":91}
+2026-11-15 10:00:02.002 infra/rsu/12/signal {"phase":"yellow","ttl_ms":1800}
+2026-11-15 10:00:02.300 fleet/vehicle/001/event {"type":"near_miss","severity":"pedestrian","confidence":0.71}
+2026-11-15 10:00:02.550 fleet/vehicle/002/status {"state":"idle","battery_pct":91}
+2026-11-15 10:00:03.100 infra/rsu/12/broadcast RSU_HEARTBEAT
+2026-11-15 10:00:03.400 fleet/vehicle/001/telemetry {"speed_kmh":28.7,"lat":35.6815,"lon":139.7678,"heading":95}
+2026-11-15 10:00:04.010 fleet/vehicle/003/telemetry {"speed_kmh":41.2,"lat":35.6801,"lon":139.769,"heading":12}
+2026-11-15 10:00:04.220 infra/rsu/12/signal {"phase":"red","ttl_ms":30000}
+2026-11-15 10:00:04.800 fleet/vehicle/001/status {"state":"yielding","battery_pct":77}
+2026-11-15 10:00:05.050 ops/alert {"level":"warn","code":"LATENCY_SPIKE","detail":"broker rtt > 120ms"}
+2026-11-15 10:00:05.400 fleet/vehicle/003/event {"type":"route_update","route_id":"A-17"}

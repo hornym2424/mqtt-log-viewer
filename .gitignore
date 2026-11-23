@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.DS_Store
+
+# Local sales notes (do not publish)
+sidework/
+
+# demo build intermediates
+docs/demo/raw/
+docs/demo/frames/
+docs/demo/demo_export.csv
+docs/demo/demo_graph.csv
+docs/demo/browser_demo.webm
+docs/demo/cursor-check*.jpg
